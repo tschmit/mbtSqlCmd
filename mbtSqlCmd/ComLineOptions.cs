@@ -34,7 +34,7 @@ namespace mbtSqlCmd {
         [Option('U', "user", Required = false, DefaultValue = null, HelpText = "user name")]
         public String UserName { get; set; }
 
-        [Option("tool", Required = true, DefaultValue = Tools.LineComp, HelpText = "tool name: LineComp")]
+        [Option("tool", Required = false, DefaultValue = Tools.LineComp, HelpText = "tool name: LineComp")]
         public Tools Tool { get; set; }
 
         [Option('w', "where", Required = false, DefaultValue = null, HelpText = "where clause")]
@@ -48,7 +48,6 @@ namespace mbtSqlCmd {
                 Copyright = new CopyrightInfo("?", 2015),
                 AddDashesToOption = true,
                 AdditionalNewLineAfterOption = true
-
             };
 
             help.AddOptions(this);
