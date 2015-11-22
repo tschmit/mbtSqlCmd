@@ -23,10 +23,18 @@ namespace mbtSqlCmd {
             }
 
             try {
-                if (options.Tool == Tools.LineComp) {
-                    CompLineTool t = new CompLineTool(options);
-                    t.Action();
+                BaseTool bt = null;
+                switch ( options.Tool) {
+                    case Tools.LineComp:
+                        bt = new LineCompTool(options);
+                        break;
+                    case Tools.SearchFields:
+                        bt = new SearchFieldsTool(options);
+                        break;
                 }
+                if ( bt != null ) {
+                    bt.Action();
+                }                
             } catch (Exception ex) {
                 while (ex != null) {
                     Console.WriteLine(ex.Message);

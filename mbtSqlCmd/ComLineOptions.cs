@@ -2,13 +2,15 @@
 using CommandLine.Text;
 using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace mbtSqlCmd {
     public enum Tools {
-        LineComp
+        LineComp,
+        SearchFields
     }
 
 
@@ -28,24 +30,24 @@ namespace mbtSqlCmd {
         [Option('S', "instance", Required = true, DefaultValue = null, HelpText = "sql instance")]
         public String ServerName { get; set; }
 
-        [Option('t', "table", Required = false, DefaultValue = null, HelpText = "table name")]
+        [Option('t', "table", Required = false, DefaultValue = null, HelpText = "table name or table name mask for SearchFields")]
         public String TableName { get; set; }
 
         [Option('U', "user", Required = false, DefaultValue = null, HelpText = "user name")]
         public String UserName { get; set; }
 
-        [Option("tool", Required = false, DefaultValue = Tools.LineComp, HelpText = "tool name: LineComp")]
+        [Option("tool", Required = false, DefaultValue = Tools.LineComp, HelpText = "tool name: LineComp, SearchFields")]
         public Tools Tool { get; set; }
 
-        [Option('w', "where", Required = false, DefaultValue = null, HelpText = "where clause")]
+        [Option('w', "where", Required = false, DefaultValue = null, HelpText = "where clause without the where, or field value name mask for SearchFields")]
         public String Where { get; set; }
 
 
         [HelpOption]
         public String GetUsage() {
             var help = new HelpText {
-                Heading = new HeadingInfo("mbtSqlTools", "0.0.0.0"),
-                Copyright = new CopyrightInfo("?", 2015),
+                Heading = new HeadingInfo("mbtSqlTools", "1.0.0.0"),
+                Copyright = new CopyrightInfo("MBT", 2015),
                 AddDashesToOption = true,
                 AdditionalNewLineAfterOption = true
             };
@@ -79,6 +81,22 @@ namespace mbtSqlCmd {
         }
 
         public Boolean IsValid { get { return !_mes.Any(x => x.Status == OptionValidationMessageStatus.error); } }
+
+        public String GetConnectionString() {
+            SqlConnectionStringBuilder csb = new SqlConnectionStringBuilder();
+            csb.DataSource = ServerName;
+            if (UseTrustedConnexion) {
+                csb.IntegratedSecurity = true;
+            } else {
+                csb.IntegratedSecurity = false;
+                csb.UserID = UserName;
+                csb.Password = Password;
+            }
+            csb.InitialCatalog = DatabaseName;
+            csb.MultipleActiveResultSets = true;
+
+            return csb.ConnectionString;
+        }
     }
 
     public enum OptionValidationMessageStatus {
