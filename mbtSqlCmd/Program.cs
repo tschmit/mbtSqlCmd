@@ -22,6 +22,25 @@ namespace mbtSqlCmd {
                     return;
             }
 
+			if ( !options.UseTrustedConnexion && String.IsNullOrEmpty(options.Password) ) {
+				Console.Write("Password: ");
+				ConsoleKeyInfo key;
+				options.Password = String.Empty;
+				do {
+					key = Console.ReadKey(true);
+					if (key.Key != ConsoleKey.Backspace && key.Key != ConsoleKey.Enter)	{
+						options.Password += key.KeyChar;
+						Console.Write("*");
+					}
+					else {
+						if (key.Key == ConsoleKey.Backspace && options.Password.Length > 0) {
+							options.Password = options.Password.Substring(0, (options.Password.Length - 1));
+							Console.Write("\b \b");
+						}
+					}
+				} while (key.Key != ConsoleKey.Enter);
+			}
+
             try {
                 BaseTool bt = null;
                 switch ( options.Tool) {

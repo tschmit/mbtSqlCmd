@@ -16,6 +16,10 @@ namespace mbtSqlCmd {
             Log("Line comparator");            
             List<String> stSqls = new List<String>();
 
+			if (!String.IsNullOrEmpty(_opts.Query)) {
+				stSqls.Add(_opts.Query);
+			}
+
             if (!String.IsNullOrEmpty(_opts.TableName)) {
                 stSqls.Add(
                     String.Format("select * from {0} {1}",
@@ -43,7 +47,7 @@ namespace mbtSqlCmd {
             }
 
             Log();
-            Log(_opts.GetConnectionString());            
+            Log(_opts.GetConnectionString(true));            
             Log();
 
             Int32 i = 0;

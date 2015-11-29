@@ -6,6 +6,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 
 namespace mbtSqlCmd {
     public enum Tools {
@@ -26,6 +27,9 @@ namespace mbtSqlCmd {
 
         [Option('P', "pwd", Required = false, DefaultValue = null, HelpText = "password")]
         public String Password { get; set; }
+
+		[Option('Q', Required = false, DefaultValue = null, HelpText = "full query")]
+		public String Query { get; set; }
 
         [Option('S', "instance", Required = true, DefaultValue = null, HelpText = "sql instance")]
         public String ServerName { get; set; }
@@ -82,7 +86,7 @@ namespace mbtSqlCmd {
 
         public Boolean IsValid { get { return !_mes.Any(x => x.Status == OptionValidationMessageStatus.error); } }
 
-        public String GetConnectionString() {
+        public String GetConnectionString(bool obfuscate = false) {
             SqlConnectionStringBuilder csb = new SqlConnectionStringBuilder();
             csb.DataSource = ServerName;
             if (UseTrustedConnexion) {
@@ -94,6 +98,11 @@ namespace mbtSqlCmd {
             }
             csb.InitialCatalog = DatabaseName;
             csb.MultipleActiveResultSets = true;
+
+			if ( obfuscate ) {
+				Regex rex = new Regex("password[ ]*=.*;?", RegexOptions.IgnoreCase);
+				return rex.Replace(csb.ConnectionString, "Password=*****;");
+			}
 
             return csb.ConnectionString;
         }
