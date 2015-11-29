@@ -28,8 +28,8 @@ namespace mbtSqlCmd {
         [Option('P', "pwd", Required = false, DefaultValue = null, HelpText = "password")]
         public String Password { get; set; }
 
-		[Option('Q', Required = false, DefaultValue = null, HelpText = "full query")]
-		public String Query { get; set; }
+        [Option('Q', Required = false, DefaultValue = null, HelpText = "full query")]
+        public String Query { get; set; }
 
         [Option('S', "instance", Required = true, DefaultValue = null, HelpText = "sql instance")]
         public String ServerName { get; set; }
@@ -99,10 +99,10 @@ namespace mbtSqlCmd {
             csb.InitialCatalog = DatabaseName;
             csb.MultipleActiveResultSets = true;
 
-			if ( obfuscate ) {
-				Regex rex = new Regex("password[ ]*=.*;?", RegexOptions.IgnoreCase);
-				return rex.Replace(csb.ConnectionString, "Password=*****;");
-			}
+            if ( obfuscate ) {
+                Regex rex = new Regex("password[ ]*=.*;?", RegexOptions.IgnoreCase);
+                return rex.Replace(csb.ConnectionString, "Password=*****;");
+            }
 
             return csb.ConnectionString;
         }
