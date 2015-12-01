@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -11,7 +12,8 @@ namespace mbtSqlCmd {
     public class SearchFieldsTool : BaseTool {
         public SearchFieldsTool(ComLineOptions opts) : base(opts) {
         }
-
+        [SuppressMessage("Microsoft.Security", "CA2100:ReviewSqlQueriesForSecurityVulnerabilities", 
+            Justification = "user must have database credential, table name as parameter")]
         public override void Action() {
             List<byte> excludedTypes = new List<byte> {
                 34 // image
@@ -56,7 +58,7 @@ namespace mbtSqlCmd {
                             }
                         }
                         where = where.Remove(0, 3);
-
+                        
                         com2.CommandText = "select * from " + kvp.Key + " where " + where;
                         using (SqlDataReader dr2 = com2.ExecuteReader()) {
                             if (dr2.HasRows) {

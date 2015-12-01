@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Data.SqlTypes;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,7 +12,8 @@ namespace mbtSqlCmd {
 
         public LineCompTool(ComLineOptions opts) : base(opts) {
         }
-
+        [SuppressMessage("Microsoft.Security", "CA2100:ReviewSqlQueriesForSecurityVulnerabilities", 
+            Justification = "user must have database credential, table name as parameter")]
         public override void Action() {
             Log("Line comparator");            
             List<String> stSqls = new List<String>();
