@@ -3,15 +3,16 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace mbtSqlCmd {
     public class SearchFieldsTool : BaseTool {
         public SearchFieldsTool(ComLineOptions opts) : base(opts) {
         }
+
+        /// <summary>
+        /// Search, by regex, which field(s) of which table(s) hold a given value
+        /// </summary>
         [SuppressMessage("Microsoft.Security", "CA2100:ReviewSqlQueriesForSecurityVulnerabilities", 
             Justification = "user must have database credential, table name as parameter")]
         public override void Action() {

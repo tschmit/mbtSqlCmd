@@ -3,15 +3,15 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Data.SqlTypes;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 
 namespace mbtSqlCmd {
     public class LineCompTool : BaseTool {
 
         public LineCompTool(ComLineOptions opts) : base(opts) {
         }
+
         [SuppressMessage("Microsoft.Security", "CA2100:ReviewSqlQueriesForSecurityVulnerabilities", 
             Justification = "user must have database credential, table name as parameter")]
         public override void Action() {
@@ -46,7 +46,7 @@ namespace mbtSqlCmd {
                 if ( sb.Length > 0 ) {
                     stSqls.Add(sb.ToString());
                 }
-            }
+            }            
 
             Log();
             Log(_opts.GetConnectionString(true));            
@@ -102,6 +102,14 @@ namespace mbtSqlCmd {
                 for (Int32 j = 1; j <= delta; j++) {
                     Log("-- Comparing {0} and {1}", j, j + delta);
                     for (i = 0; i < l[1].Length; i++) {
+                        if ( _opts.IncludeOnlyFieldsRegEx != null ) {
+                            if (!_opts.IncludeOnlyFieldsRegEx.IsMatch(l[0][i].ToString()))
+                                continue;
+                        }
+                        if (_opts.ExcludeFieldsRegEx != null) {
+                            if (_opts.ExcludeFieldsRegEx.IsMatch(l[0][i].ToString()))
+                                continue;
+                        }
                         if (l[j][i] is DateTime || l[j][i] is SqlDateTime) {
                             DateTime dt1 = (DateTime)l[j][i], dt2 = (DateTime)l[j + delta][i];
                             if (dt1 != dt2) {
