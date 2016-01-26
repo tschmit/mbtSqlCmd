@@ -1,5 +1,7 @@
 # mbtSqlCmd
 
+[![Build status](https://ci.appveyor.com/api/projects/status/32e64n6n1oa70s1w?svg=true)](https://ci.appveyor.com/project/tschmit/mbtsqlcmd)
+
 Command line tool for comparing rows from Sql Server
 
 "mbtSqlCmd" is a command line tool for field by field row comparison. That's is, for at least two rows from the same query, the tool compares each field and exhibit the fields that are differently valued from one row to another.
