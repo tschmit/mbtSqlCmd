@@ -5,6 +5,7 @@ using System.Data.SqlTypes;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Data.Common;
 
 namespace mbtSqlCmd {
     public class LineCompTool : BaseTool {
@@ -56,14 +57,14 @@ namespace mbtSqlCmd {
             List<List<object[]>> rows = new List<List<object[]>>();
             Int32 fieldCount = 0;
             Int32 maxFieldNameLength = 15;
-            using (SqlConnection con = new SqlConnection(_opts.GetConnectionString())) {
+			using (DbConnection con = _opts.GetDbConnection()) {
                 con.Open();
-                using(SqlCommand com = new SqlCommand()) {
+				using(DbCommand com = con.CreateCommand() ) {
                     com.Connection = con;
                     foreach (String stSql in stSqls) {
                         Log(stSql.Trim());
                         com.CommandText = stSql;
-                        using (SqlDataReader dr = com.ExecuteReader()) {
+                        using (DbDataReader dr = com.ExecuteReader()) {
                             do {
                                 fieldCount = dr.FieldCount;
                                 List<object[]> l = new List<object[]>();

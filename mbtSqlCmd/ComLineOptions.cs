@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Data.Common;
+using MySql.Data.MySqlClient;
 
 namespace mbtSqlCmd {
     public enum Tools {
@@ -12,10 +14,17 @@ namespace mbtSqlCmd {
         SearchFields
     }
 
+	public enum DatabaseSystems {
+		mssql,
+		mysql
+	}
 
     public class ComLineOptions {
         [Option('d', "database", Required = true, DefaultValue = null, HelpText = "database name")]
         public String DatabaseName { get; set; }
+
+		[Option("dbs", Required = false, DefaultValue = DatabaseSystems.mssql, HelpText = "database system name (mssql, mysql, to be continued)")]
+		public DatabaseSystems DatabaseSystem { get; set; }
 
         [Option('E', "usetrusted", Required = false, DefaultValue = false, HelpText = "use trusted connexion")]
         public bool UseTrustedConnexion { get; set; }
@@ -49,6 +58,9 @@ namespace mbtSqlCmd {
 
         [Option('w', "where", Required = false, DefaultValue = null, HelpText = "where clause without the where, or field value name mask for SearchFields")]
         public String Where { get; set; }
+
+		[Option('v', "verbose", Required = false, DefaultValue = false, HelpText = "say me everything you know")]
+		public bool Verbose { get; set; }
 
         public Regex IncludeOnlyFieldsRegEx { get; private set; }
 
@@ -115,26 +127,65 @@ namespace mbtSqlCmd {
 
         public Boolean IsValid { get { return !_mes.Any(x => x.Status == OptionValidationMessageStatus.error); } }
 
-        public String GetConnectionString(bool obfuscate = false) {
-            SqlConnectionStringBuilder csb = new SqlConnectionStringBuilder();
-            csb.DataSource = ServerName;
-            if (UseTrustedConnexion) {
-                csb.IntegratedSecurity = true;
-            } else {
-                csb.IntegratedSecurity = false;
-                csb.UserID = UserName;
-                csb.Password = Password;
-            }
-            csb.InitialCatalog = DatabaseName;
-            csb.MultipleActiveResultSets = true;
+		private string GetSqlServerConnectionString(bool obfuscate) {
+			SqlConnectionStringBuilder csb = new SqlConnectionStringBuilder ();
+			csb.DataSource = ServerName;
+			if (UseTrustedConnexion) {
+				csb.IntegratedSecurity = true;
+			} else {
+				csb.IntegratedSecurity = false;
+				csb.UserID = UserName;
+				csb.Password = Password;
+			}
+			csb.InitialCatalog = DatabaseName;
+			csb.MultipleActiveResultSets = true;
 
-            if ( obfuscate ) {
-                Regex rex = new Regex("password[ ]*=.*;?", RegexOptions.IgnoreCase);
-                return rex.Replace(csb.ConnectionString, "Password=*****;");
-            }
+			if ( obfuscate ) {
+				Regex rex = new Regex("password[ ]*=.*;?", RegexOptions.IgnoreCase);
+				return rex.Replace(csb.ConnectionString, "Password=*****;");
+			}
 
-            return csb.ConnectionString;
+			return csb.ConnectionString;
+		}
+
+		private string GetMySqlServerConnectionString(bool obfuscate) {
+			MySqlConnectionStringBuilder csb = new MySqlConnectionStringBuilder();
+			csb.Server = ServerName;
+			if ( UseTrustedConnexion ) {
+				throw new Exception ($"not supported options combination: --dbs mysql -E");
+			} else {
+				csb.UserID = UserName;
+				if ( !string.IsNullOrWhiteSpace(Password))
+				    csb.Password = Password;
+			}
+
+			csb.Database = DatabaseName;
+
+			if ( obfuscate ) {
+				Regex rex = new Regex("password[ ]*=.*;?", RegexOptions.IgnoreCase);
+				return rex.Replace(csb.ConnectionString, "Password=*****;");
+			}
+
+			return csb.ToString();
+		}
+
+		public String GetConnectionString(bool obfuscate = false) {
+			switch (DatabaseSystem) {
+			    case DatabaseSystems.mysql:
+				    return GetMySqlServerConnectionString(obfuscate);
+			    default :
+				    return GetSqlServerConnectionString(obfuscate);
+			}            
         }
+
+		public DbConnection GetDbConnection() {
+			switch (DatabaseSystem) {
+			    case DatabaseSystems.mysql:
+				    return new MySqlConnection(GetConnectionString());
+			    default:
+				    return new SqlConnection(GetConnectionString());
+			}
+		}
     }
 
     public enum OptionValidationMessageStatus {

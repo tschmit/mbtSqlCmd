@@ -4,6 +4,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
+using System.Data.Common;
 
 namespace mbtSqlCmd {
     public class SearchFieldsTool : BaseTool {
@@ -16,6 +17,10 @@ namespace mbtSqlCmd {
         [SuppressMessage("Microsoft.Security", "CA2100:ReviewSqlQueriesForSecurityVulnerabilities", 
             Justification = "user must have database credential, table name as parameter")]
         public override void Action() {
+			if (_opts.DatabaseSystem != DatabaseSystems.mssql) {
+				throw new Exception ("not supported options combinations: --dbs mysql --tool SearchFields");
+			}
+
             List<byte> excludedTypes = new List<byte> {
                 34 // image
             };
@@ -23,25 +28,29 @@ namespace mbtSqlCmd {
             Log("Searching in Fields...");
 
             Dictionary<string, int> tables = new Dictionary<string, int>();
-            using (SqlConnection con = new SqlConnection(_opts.GetConnectionString())) {
+			using (SqlConnection con = (SqlConnection)_opts.GetDbConnection()) {
                 con.Open();
-                using (SqlCommand com = new SqlCommand(), com2 = new SqlCommand()) {
+				using (SqlCommand com = con.CreateCommand(), com2 = con.CreateCommand()) {
                     com.Connection = con; com2.Connection = con;
                     com.CommandText = "select [object_id], [name] from sys.tables";
                     if ( !String.IsNullOrEmpty(_opts.TableName )) {
                         com.CommandText += " where [name] like '" + _opts.TableName + "'";
                     }
                     com.CommandText += " order by [name]";
-                    using (SqlDataReader dr = com.ExecuteReader()) {
+                    using (DbDataReader dr = com.ExecuteReader()) {
                         while (dr.Read())
                             tables[dr.GetString(1)] = dr.GetInt32(0);
                     }
+					Console.WriteLine ($"{tables.Count} tables...");
 
                     com.CommandText = "select name, system_type_id from sys.columns where object_id = @tid";
                     com.Parameters.Add("@tid", SqlDbType.Int);                    
 
                     com2.Parameters.Add("@v", SqlDbType.NVarChar);
                     com2.Parameters["@v"].Value = _opts.Where;
+					if (_opts.Verbose) {
+						Console.WriteLine ($"@v : {_opts.Where}");
+					}				
                     Regex rg = new Regex(
                         _opts.Where.Replace("%", ".*").Replace("_", "."),
                         RegexOptions.IgnoreCase);
@@ -61,6 +70,9 @@ namespace mbtSqlCmd {
                         where = where.Remove(0, 3);
                         
                         com2.CommandText = "select * from " + kvp.Key + " where " + where;
+						if (_opts.Verbose) {
+							Console.WriteLine (com2.CommandText);
+						}
                         using (SqlDataReader dr2 = com2.ExecuteReader()) {
                             if (dr2.HasRows) {
                                 Log("-- TABLE {0}:", kvp.Key);

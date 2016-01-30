@@ -39,6 +39,7 @@ namespace mbtSqlCmd {
                         }
                     }
                 } while (key.Key != ConsoleKey.Enter);
+				Console.WriteLine ();
             }
 
             try {
@@ -50,6 +51,8 @@ namespace mbtSqlCmd {
                     case Tools.SearchFields:
                         bt = new SearchFieldsTool(options);
                         break;
+					default:
+					    break;
                 }
                 if ( bt != null ) {
                     bt.Action();
