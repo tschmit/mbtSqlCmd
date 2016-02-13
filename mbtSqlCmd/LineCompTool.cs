@@ -16,7 +16,7 @@ namespace mbtSqlCmd {
         [SuppressMessage("Microsoft.Security", "CA2100:ReviewSqlQueriesForSecurityVulnerabilities", 
             Justification = "user must have database credential, table name as parameter")]
         public override void Action() {
-            Log("Line comparator");            
+            Log("-- Line comparator");            
             List<String> stSqls = new List<String>();
 
             if (!String.IsNullOrEmpty(_opts.Query)) {
@@ -50,7 +50,7 @@ namespace mbtSqlCmd {
             }            
 
             Log();
-            Log(_opts.GetConnectionString(true));            
+			Log($"-- {_opts.GetConnectionString(true)}");            
             Log();
 
             Int32 i = 0;

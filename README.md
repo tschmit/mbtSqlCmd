@@ -10,6 +10,8 @@ The flags are, as much as possible, the same as those of [SqlCmd](https://msdn.m
 
 Main/Default tool, that is LineComp, supports MySql connections.
 
+Secondary tool SearchFields support MySql connection in an experimental status.
+
 ## Usages
 
 ### Basic usage  
